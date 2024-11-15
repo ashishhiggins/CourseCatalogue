@@ -3,6 +3,9 @@ pipeline {
     tools {
         maven 'Maven'
     }
+    environment {
+        IMAGE_NAME = 'ashishhiggins/course-catalogue'  // Image name
+    }
     stages{
         stage('Build Maven'){
             steps{
@@ -13,7 +16,15 @@ pipeline {
         stage('Build Docker Image'){
             steps{
                 script{
-                    bat 'docker build -t ashishhiggins/course-catalogue .'
+                    bat 'docker build -t %IMAGE_NAME% .'
+                }
+            }
+        }
+        stage('Deploy Docker Container') {
+            steps {
+                script {
+                    // Run the Docker container
+                    bat "docker run -d -p 9090:9090 %IMAGE_NAME%"
                 }
             }
         }
