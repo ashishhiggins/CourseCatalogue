@@ -20,6 +20,28 @@ pipeline {
                 }
             }
         }
+        stages {
+                stage('Stop Docker Container on Port 9090') {
+                    steps {
+                        script {
+                            sh '''
+                            #!/bin/bash
+
+                            # Find the container running on port 9090
+                            container_id=$(docker ps -q -f "publish=9090")
+
+                            # Check if a container was found and stop it
+                            if [ -n "$container_id" ]; then
+                              echo "Stopping container $container_id running on port 9090"
+                              docker stop $container_id
+                              docker rm $container_id
+                            else
+                              echo "No container running on port 9090."
+                            fi
+                            '''
+                        }
+                    }
+                }
         stage('Deploy Docker Container') {
             steps {
                 script {
