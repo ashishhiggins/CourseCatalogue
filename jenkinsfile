@@ -20,8 +20,7 @@ pipeline {
                 }
             }
         }
-        stages {
-                stage('Stop Docker Container on Port 9090') {
+        stage('Stop Docker Container on Port 9090') {
                     steps {
                         script {
                             sh '''
@@ -40,8 +39,8 @@ pipeline {
                             fi
                             '''
                         }
+                       }
                     }
-                }
         stage('Deploy Docker Container') {
             steps {
                 script {
