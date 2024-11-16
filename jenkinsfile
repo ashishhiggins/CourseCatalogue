@@ -20,7 +20,7 @@ pipeline {
                 }
             }
         }
-      stage('Stop Docker Container on Port 9090') {
+      stage('Stop and Deploy Docker Container') {
                   steps {
                       script {
                           sh '''
@@ -29,46 +29,24 @@ pipeline {
                           # Find the container running on port 9090
                           container_id=$(docker ps -q -f "publish=9090")
 
-                          # Check if a container was found and stop it
+                          # Check if a container was found
                           if [ -n "$container_id" ]; then
-                            echo "Stopping container $container_id running on port 9090"
-                            docker stop $container_id
+                              echo "Stopping container $container_id running on port 9090..."
+                              docker stop $container_id
 
-                            # Wait for the container to stop completely before attempting to remove it
-                            while [ "$(docker ps -q -f "id=$container_id")" ]; do
-                              echo "Waiting for container $container_id to stop..."
-                              sleep 2
-                            done
-
-                            # Check if the container is already removed (it might be auto-removed by Docker)
-                            if ! docker ps -a -q -f "id=$container_id" > /dev/null; then
-                              echo "Container $container_id has already been removed (possibly auto-removed by Docker)."
-                            else
-                              # Try removing the container once it's stopped
-                              echo "Container $container_id stopped. Removing..."
-                              retries=5
-                              count=0
-                              while [ $count -lt $retries ]; do
-                                # Try removing the container
-                                docker rm $container_id && break
-                                # If it fails, wait for a few seconds and try again
-                                echo "Waiting for container to be removed... attempt $((count+1))"
-                                sleep 2
-                                count=$((count+1))
+                              # Wait for the container to stop
+                              while [ "$(docker ps -q -f "id=$container_id")" ]; do
+                                  echo "Waiting for container $container_id to stop..."
+                                  sleep 2
                               done
-
-                              if [ $count -ge $retries ]; then
-                                echo "Failed to remove container $container_id after $retries attempts."
-                                exit 1
-                              fi
-                            fi
+                              echo "Container $container_id stopped."
                           else
-                            echo "No container running on port 9090."
+                              echo "No container running on port 9090."
                           fi
                           '''
                       }
-             }
-      }
+                  }
+              }
         stage('Deploy Docker Container') {
             steps {
                 script {
